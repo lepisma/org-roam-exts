@@ -3,3 +3,33 @@
 Org-Roam extensions to support better workflow for links and connections between
 nodes. In case you have come to this from EmacsConf 2024, please note that this
 is a work in progress repository with better documentation to come soon.
+
+* Configuration
+Here is what my current set up is like:
+
+#+begin_src emacs-lisp
+  (use-package org-roam-exts
+    :vc (:fetcher github :repo lepisma/org-roam-exts)
+    :config
+
+    ;; Ensure that the side buffer is positioned in the right way
+    (add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*"
+               (display-buffer-in-direction)
+               (direction . right)
+               (window-width . 0.33)
+               (window-height . fit-window-to-buffer)))
+
+    ;; Enable rich link preview and similar nodes in org-roam-buffer
+    (org-roam-exts-enable)
+    ;; Enable org-protocol for sidekick functionality
+    (org-orma-sk-enable))
+#+end_src
+
+The browser bookmark is set to the following URL that triggers the sidekick
+protocol: ~javascript:location.href = 'org-protocol://roam-sk?url=' +
+encodeURIComponent(location.href)~
+
+** TODO Running the ~org-roam-sem~ server
+The ML system behind similarity and search needs a separate Python server to be
+running. This will be documented better once the structure is settled on.

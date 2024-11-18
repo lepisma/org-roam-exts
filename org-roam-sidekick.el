@@ -150,8 +150,11 @@ display in the sidekick way."
   (org-roam-sk-url-dispatch (plist-get info :url))
   nil)
 
-(push (list "org-roam-sk" :protocol "roam-sk" :function #'org-roam-sk-protocol-open)
-      org-protocol-protocol-alist)
+;;;###autoload
+(defun org-roam-sk-enable ()
+  "Enable sidekick protocol."
+  (push (list "org-roam-sk" :protocol "roam-sk" :function #'org-roam-sk-protocol-open)
+        org-protocol-protocol-alist))
 
 (provide 'org-roam-sidekick)
 

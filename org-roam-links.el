@@ -31,19 +31,10 @@
 (require 'org-roam-category)
 (require 'org-roam-sem)
 
-(add-to-list 'display-buffer-alist
-             '("\\*org-roam\\*"
-               (display-buffer-in-direction)
-               (direction . right)
-               (window-width . 0.33)
-               (window-height . fit-window-to-buffer)))
-
 (defun org-roam-preview-line-function ()
   "Org roam preview function that only returns the current line.
 This helps in showing more links in the roam buffer."
   (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
-
-(setq org-roam-preview-function #'org-roam-preview-line-function)
 
 (cl-defun org-roam-node-insert-similarlink-section (&key dest-node point properties)
   "Show section for a similar node, DEST-NODE.
@@ -193,10 +184,6 @@ logic makes sense."
          :dest-node (car snode-score)
          :point 1
          :properties (list :score (cdr snode-score)))))))
-
-(setq org-roam-mode-sections (list #'org-roam-links-section
-                                   #'org-roam-reflinks-section
-                                   #'org-roam-similar-section))
 
 (cl-defmethod org-roam-node-connections-from ((node org-roam-node))
   "Return all direct nodes going out `from' the given NODE."

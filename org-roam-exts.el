@@ -35,6 +35,15 @@
 (require 'org-roam-sem)
 (require 'org-roam-links)
 
+;;;###autoload
+(defun org-roam-exts-enable ()
+  "Enable org-roam-exts."
+  (interactive)
+  (setq org-roam-preview-function #'org-roam-preview-line-function
+        org-roam-mode-sections (list #'org-roam-links-section
+                                     #'org-roam-reflinks-section
+                                     #'org-roam-similar-section)))
+
 (provide 'org-roam-exts)
 
 ;;; org-roam-exts.el ends here
