@@ -1,4 +1,5 @@
 #+TITLE: Org-Roam Link Extensions
 
 Org-Roam extensions to support better workflow for links and connections between
-nodes.
+nodes. In case you have come to this from EmacsConf 2024, please note that this
+is a work in progress repository with better documentation to come soon.
