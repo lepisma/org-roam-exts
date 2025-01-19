@@ -95,21 +95,19 @@ the 'content' that's used for generating embedding."
                        (title . ,title)))))
 
 (defun org-roam-sem-store-nodes (nodes)
-  "Store all NODES in the database.
-
-TODO: Fix upsert"
+  "Store all NODES in the database."
   (let ((batch-size 50)
         batch)
     (mapc (lambda (node)
             (push node batch)
             (when (= batch-size (length batch))
               (sem-add-batch org-roam-sem-db batch #'org-roam-node-embed-batch
-                             #'org-roam-node--sem-write-fn org-roam-sem-nodes-table)
+                             #'org-roam-node--sem-write-fn org-roam-sem-nodes-table t)
               (setq batch nil)))
           nodes)
     (when batch
       (sem-add-batch org-roam-sem-db batch #'org-roam-node-embed-batch
-                     #'org-roam-node--sem-write-fn org-roam-sem-nodes-table))))
+                     #'org-roam-node--sem-write-fn org-roam-sem-nodes-table t))))
 
 (defun org-roam-sem-sync ()
   "Sync all nodes and links with the vector storage."
