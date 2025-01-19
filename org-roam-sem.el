@@ -29,8 +29,26 @@
 
 (require 'url)
 (require 'json)
+(require 'cl-generic)
 (require 'org-roam)
 (require 'org-roam-category)
+(require 'sem)
+(require 'sem-embed)
+
+(defcustom org-roam-sem-db-name "org-roam-sem"
+  "Name of the sem database to use for storing vectors."
+  :type 'string)
+
+(defcustom org-roam-sem-nodes-table "nodes"
+  "Name of the table where node embeddings are going to be stored."
+  :type 'string)
+
+(defcustom org-roam-sem-links-table "links"
+  "Name of the table where link embeddings are going to be kept."
+  :type 'string)
+
+(defvar org-roam-sem-db nil
+  "Placeholder for sem db.")
 
 (defun org-roam-sem--request (path)
   "Send GET request to sem server with given PATH and return json
@@ -44,21 +62,74 @@ response."
         (let ((json-array-type 'list))
           (json-read))))))
 
-(defun org-roam-sem--request-search-links (term)
-  (org-roam-sem--request (format "/search/links/%s" (url-encode-url term))))
+(defun org-roam-sem-setup ()
+  "Connect to database, creating it and needed tables if not already
+present."
+  (setq org-roam-sem-db (if (sem-db-present-p org-roam-sem-db-name)
+                            (sem-db-load org-roam-sem-db-name)
+                          (sem-db-new org-roam-sem-db-name sem-embed-dim)))
+  (unless (sem-table-present-p org-roam-sem-db org-roam-sem-nodes-table)
+    (sem-table-new org-roam-sem-db org-roam-sem-nodes-table sem-embed-dim))
+  (unless (sem-table-present-p org-roam-sem-db org-roam-sem-links-table)
+    (sem-table-new org-roam-sem-db org-roam-sem-links-table sem-embed-dim)))
 
-(defun org-roam-sem--request-similar (id)
-  "Send request to sem server with node ID and return a list of ID
-and score pairs for similar nodes."
-  (org-roam-sem--request (format "/similar/%s" id)))
+(defun org-roam-node-embed-batch (nodes)
+  "Batch embed NODES.
+
+At present this only returns sentence vector for the title and does not
+use any other content like tags."
+  (sem-embed-default (apply #'vector (mapcar #'org-roam-node-title nodes))))
+
+(cl-defmethod org-roam-node-embed ((node org-roam-node))
+  "Return a vector embedding for given NODE."
+  (aref (org-roam-node-embed-batch (list node)) 0))
+
+(cl-defmethod org-roam-node--sem-write-fn ((node org-roam-node))
+  "The function to serialize NODE to string for storage in a sem database.
+
+We store node id so that the node can be recovered and title as that's
+the 'content' that's used for generating embedding."
+  (let ((id (org-roam-node-id node))
+        (title (org-roam-node-id node)))
+    (prin1-to-string `((id . ,id)
+                       (title . ,title)))))
+
+(defun org-roam-sem-store-nodes (nodes)
+  "Store all NODES in the database.
+
+TODO: Fix upsert"
+  (let ((batch-size 50)
+        batch)
+    (mapc (lambda (node)
+            (push node batch)
+            (when (= batch-size (length batch))
+              (sem-add-batch org-roam-sem-db batch #'org-roam-node-embed-batch
+                             #'org-roam-node--sem-write-fn org-roam-sem-nodes-table)
+              (setq batch nil)))
+          nodes)
+    (when batch
+      (sem-add-batch org-roam-sem-db batch #'org-roam-node-embed-batch
+                     #'org-roam-node--sem-write-fn org-roam-sem-nodes-table))))
+
+(defun org-roam-sem-sync ()
+  "Sync all nodes and links with the vector storage."
+  (interactive)
+  (let ((nodes (org-roam-node-list)))
+    (org-roam-sem-store-nodes nodes)
+    (message "Upserted %d nodes" (length nodes))))
 
 (defun org-roam-sem-similar (node)
-  "Find nodes similar to NODE by using the sem API.
+  "Find nodes similar to NODE by matching with stored vectors.
 
-The API takes care of pruning items that are already linked to the node."
-  (mapcar (lambda (id-score) (cons (org-roam-populate (org-roam-node-create :id (car id-score)))
-                                   (cadr id-score)))
-          (org-roam-sem--request-similar (org-roam-node-id node))))
+TODO: The API used to take care of pruning items that are already linked
+to the node.  This needs to be brought back.
+TODO: Also add score filtering at 0.6."
+  (mapcar (lambda (it) (cons (org-roam-populate (org-roam-node-create :id (alist-get 'id (cdr it))))
+                             (car it)))
+          (sem-similar org-roam-sem-db node 10 #'org-roam-node-embed #'read org-roam-sem-nodes-table)))
+
+(defun org-roam-sem--request-search-links (term)
+  (org-roam-sem--request (format "/search/links/%s" (url-encode-url term))))
 
 (defun org-roam-sem--link-context (link-data)
   (let ((source-node (org-roam-populate (org-roam-node-create :id (nth 0 link-data)))))
