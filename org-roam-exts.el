@@ -42,7 +42,8 @@
   (setq org-roam-preview-function #'org-roam-preview-line-function
         org-roam-mode-sections (list #'org-roam-links-section
                                      #'org-roam-reflinks-section
-                                     #'org-roam-similar-section)))
+                                     #'org-roam-similar-section))
+  (org-roam-sem-setup))
 
 (provide 'org-roam-exts)
 
