@@ -1,10 +1,8 @@
-#+TITLE: Org-Roam Link Extensions
+#+TITLE: Org-Roam Extensions
 
 Org-Roam extensions to support better workflow for links and connections between
-nodes. In case you have come to this from EmacsConf 2024, please note that this
-is a work in progress repository with better documentation to come soon.
+nodes. An older version was demoed in EmacsConf 2024 [[https://emacsconf.org/2024/talks/links/][here]].
 
-* Configuration
 Here is what my current set up is like:
 
 #+begin_src emacs-lisp
@@ -31,10 +29,3 @@ Here is what my current set up is like:
 The browser bookmark is set to the following URL that triggers the sidekick
 protocol: ~javascript:location.href = 'org-protocol://roam-sk?url=' +
 encodeURIComponent(location.href)~
-
-** TODO Running the ~org-roam-sem~ server
-The ML system behind similarity and search needs a separate Python server to be
-running.
-
-I am migrating this to use [[https://github.com/lepisma/sem.el/][sem.el]] instead. Once done, this part of the
-documentation will change.
