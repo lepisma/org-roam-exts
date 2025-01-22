@@ -31,6 +31,7 @@
 (require 'org-roam-category)
 (require 'sem)
 (require 'sem-embed)
+(require 'seq)
 
 (defcustom org-roam-sem-db-name "org-roam-sem"
   "Name of the sem database to use for storing vectors."
@@ -135,15 +136,28 @@ opening buffers where link is established."
     (org-roam-sem-store-links links)
     (message "Stored %d links" (length links))))
 
-(defun org-roam-sem-similar (node)
-  "Find nodes similar to NODE by matching with stored vectors.
+(defun org-roam-sem--blacklist-ids (node)
+  "Return a list of node ids that should be removed from NODE similarity
+considerations."
+  ;; TODO: There is a circular dependency here which will be resolved later.
+  (mapcar #'org-roam-node-id (append (list node) (org-roam-node-connections node))))
 
-TODO: The API used to take care of pruning items that are already linked
-to the node.  This needs to be brought back.
-TODO: Also add score filtering at 0.6."
-  (mapcar (lambda (it) (cons (org-roam-populate (org-roam-node-create :id (alist-get 'id (cdr it))))
-                             (car it)))
-          (sem-similar org-roam-sem-db node 10 #'org-roam-node-embed #'read org-roam-sem-nodes-table)))
+(defun org-roam-sem-similar (node)
+  "Find nodes similar to NODE by matching with stored vectors."
+  (let* ((score-threshold 0.6)
+         (max-num 10)
+         (blacklist-ids (org-roam-sem--blacklist-ids node))
+         ;; HACK: We take 2 times more results to account for a large blacklist
+         (results (sem-similar org-roam-sem-db node (* 2 max-num) #'org-roam-node-embed #'read org-roam-sem-nodes-table)))
+    (mapcar (lambda (result)
+              (cons (org-roam-populate (org-roam-node-create :id (alist-get 'id (cdr result))))
+                    (car result)))
+            (seq-take
+             (seq-remove (lambda (result)
+                           (or (< (car result) score-threshold)
+                               (member (alist-get 'id (cdr result)) blacklist-ids)))
+                         results)
+             max-num))))
 
 (defun org-roam-sem--insert-link-results (results)
   "Insert the search RESULTS from semantic link search.
