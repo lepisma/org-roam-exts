@@ -1,6 +1,6 @@
 ;;; org-roam-category.el --- Categorization functions for roam items -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2024 Abhinav Tushar
+;; Copyright (c) 2024-2025 Abhinav Tushar
 
 ;; Author: Abhinav Tushar <abhinav@lepisma.xyz>
 

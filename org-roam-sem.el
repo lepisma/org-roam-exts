@@ -1,6 +1,6 @@
 ;;; org-roam-sem.el --- Semantic extensions for Org-Roam -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2024 Abhinav Tushar
+;; Copyright (c) 2024-2025 Abhinav Tushar
 
 ;; Author: Abhinav Tushar <abhinav@lepisma.xyz>
 
@@ -27,8 +27,10 @@
 ;;; Code:
 
 (require 'cl-generic)
+(require 'magit-section)
 (require 'org-roam)
 (require 'org-roam-category)
+(require 'org-roam-links)
 (require 'sem)
 (require 'sem-embed)
 (require 'seq)
@@ -102,19 +104,6 @@ type of link one is."
         (dest-node (org-roam-populate (org-roam-node-create :id (nth 1 link-data)))))
     (list (org-roam-node-category source-node)
           (org-roam-node-category dest-node))))
-
-(defun org-roam-links ()
-  "Return a list of all id type links stored in the org-roam database.
-
-This might be a heavy operation since reading link context involves
-opening buffers where link is established."
-  (let ((sql [:select [source dest pos properties] :from links :where (= type "id")]))
-    (mapcar (lambda (link-data)
-              (list :source-id (nth 0 link-data)
-                    :dest-id (nth 1 link-data)
-                    :context (org-roam-sem--link-context link-data)
-                    :categories (org-roam-sem--link-categories link-data)))
-            (org-roam-db-query sql))))
 
 (defun org-roam-sem-link-embed-batch (links)
   "Embed a list of LINKS."

@@ -28,6 +28,7 @@
 
 (require 'org-roam)
 (require 'org-protocol)
+(require 'org-roam-exts-utils)
 
 (defun org-roam-sk-find-ref (url)
   "Return a node if the given URL is saved in the database.
@@ -45,21 +46,6 @@ TODO: This needs url normalization since there are extra slashes
         (if (string-match "&" query-string)
             (substring query-string 0 (match-beginning 0))
           (string-replace "+" " " (url-unhex-string query-string)))))))
-
-(defun current-line-string ()
-  "Return current line string."
-  (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
-
-(defun org-file-title (filepath)
-  "Return title for the org file at given FILEPATH."
-  (save-excursion
-    (with-temp-buffer
-      (setq-local case-fold-search t)
-      (insert-file-contents filepath nil nil 1000)
-      (goto-char (point-min))
-      ;; We assume every file has title
-      (when (re-search-forward "^#\\+TITLE:\\(.*\\)$")
-        (string-trim (match-string-no-properties 1))))))
 
 (defun org-roam-sk--recoll-parse (text)
   "Parse the complete TEXT coming from recollq search and return a
