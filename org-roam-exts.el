@@ -3,7 +3,7 @@
 ;; Copyright (c) 2024-2025 Abhinav Tushar
 
 ;; Author: Abhinav Tushar <abhinav@lepisma.xyz>
-;; Version: 0.0.1
+;; Version: 0.1.0
 ;; Package-Requires: ((emacs "29") (org-roam "2.2.2") (org "9.7.15") (magit-section "4.2.0") (seq "2.24"))
 ;; Keywords: roam, org-mode, writing
 ;; URL: https://github.com/lepisma/org-roam-exts
