@@ -35,25 +35,6 @@
 (require 'org-roam-sem)
 (require 'org-roam-sidekick)
 
-(defun org-roam-exts-show-buffer ()
-  "Show org-roam buffer if it's not visible."
-  (pcase (org-roam-buffer--visibility)
-    ((or 'exists 'none)
-     (progn
-       (display-buffer (get-buffer-create org-roam-buffer))
-       (org-roam-buffer-persistent-redisplay)))))
-
-;;;###autoload
-(defun org-roam-exts-enable ()
-  "Enable org-roam-exts."
-  (interactive)
-  (setq org-roam-preview-function #'current-line-string
-        org-roam-mode-sections (list #'org-roam-links-section
-                                     #'org-roam-reflinks-section
-                                     #'org-roam-similar-section))
-  (org-roam-sem-setup)
-  (add-hook 'org-roam-find-file-hook #'org-roam-exts-show-buffer))
-
 (provide 'org-roam-exts)
 
 ;;; org-roam-exts.el ends here

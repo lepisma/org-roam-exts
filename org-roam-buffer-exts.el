@@ -157,6 +157,16 @@ the same time:
          :point 1
          :properties (list :score (cdr snode-score)))))))
 
+;;;###autoload
+(defun org-roam-buffer-exts-enable ()
+  "Enable extensions for Org Roam buffer."
+  (interactive)
+  (setq org-roam-preview-function #'current-line-string
+        org-roam-mode-sections (list #'org-roam-links-section
+                                     #'org-roam-reflinks-section
+                                     #'org-roam-similar-section))
+  (org-roam-sem-setup))
+
 (provide 'org-roam-buffer-exts)
 
 ;;; org-roam-buffer-exts.el ends here
