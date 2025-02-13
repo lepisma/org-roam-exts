@@ -167,6 +167,7 @@ Each item in results is a pair of score and link."
                                     (oset section file (org-roam-node-file source-node))
                                     (insert (org-roam-fontify-like-in-org-mode (plist-get (cdr result) :context)) "\n\n")))))))))
 
+;;;###autoload
 (defun org-roam-sem-search-links (term)
   "Search links using semantic search using the TERM."
   (interactive "sSearch: ")
@@ -184,6 +185,7 @@ Each item in results is a pair of score and link."
         (switch-to-buffer "*org-roam-link-search*"))
     (message "No link results found for term: %s" term)))
 
+;;;###autoload
 (defun org-roam-sem-search (term)
   "Search nodes by given TERM."
   (interactive "sSearch: ")
