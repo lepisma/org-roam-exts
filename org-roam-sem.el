@@ -184,6 +184,14 @@ Each item in results is a pair of score and link."
         (switch-to-buffer "*org-roam-link-search*"))
     (message "No link results found for term: %s" term)))
 
+(defun org-roam-sem-search (term)
+  "Search nodes by given TERM."
+  (interactive "sSearch: ")
+  (let* ((search-results (sem-similar org-roam-sem-db term 10 (lambda (text) (aref (sem-embed-default (list text)) 0))
+                                      #'read org-roam-sem-nodes-table))
+         (scores-nodes (mapcar (lambda (res) (cons (car res) (org-roam-populate (org-roam-node-create :id (alist-get 'id (cdr res)))))) search-results)))
+    (completing-read "Search results: " (mapcar (lambda (score-node) (cons (format "[%.3f] %s" (car score-node) (org-roam-node-title (cdr score-node))) score-node)) scores-nodes))))
+
 (provide 'org-roam-sem)
 
 ;;; org-roam-sem.el ends here
