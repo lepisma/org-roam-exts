@@ -189,7 +189,8 @@ Each item in results is a pair of score and link."
   (interactive "sSearch: ")
   (let* ((search-results (sem-similar org-roam-sem-db term 10 (lambda (text) (aref (sem-embed-default (list text)) 0))
                                       #'read org-roam-sem-nodes-table))
-         (scores-nodes (mapcar (lambda (res) (cons (car res) (org-roam-populate (org-roam-node-create :id (alist-get 'id (cdr res)))))) search-results)))
+         (scores-nodes (mapcar (lambda (res) (cons (car res) (org-roam-populate (org-roam-node-create :id (alist-get 'id (cdr res)))))) search-results))
+         (vertico-sort-function nil))
     (completing-read "Search results: " (mapcar (lambda (score-node) (cons (format "[%.3f] %s" (car score-node) (org-roam-node-title (cdr score-node))) score-node)) scores-nodes))))
 
 (provide 'org-roam-sem)
